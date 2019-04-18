@@ -23,6 +23,7 @@ body {
 
 .chart-container {
 	margin-top: 10px;
+	/*margin-left: -1px;*/
 	border: 1px solid #aaa;
 	width: 100%;
 	height: 95%;

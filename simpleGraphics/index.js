@@ -21,8 +21,8 @@
             const inpX1 = document.getElementById('start-point');
             const inpX2 = document.getElementById('end-point');
 
-            const start = inpX1.value;
-            const end = inpX2.value;
+            const start = Number(inpX1.value);
+            const end = Number(inpX2.value);
 
             render(start, end);
         }
@@ -79,36 +79,55 @@
         let ymin = f(start);
         let ymax = ymin;
         ctx.beginPath();
+        let drawnAxisX = false;
+        let drawnAxisY = false;
+        let oldX = 0;
         ctx.strokeStyle = graphColor;
         for (let xx = 0; xx < canvas.width; xx++) {
             let x = start + xx * (end - start) / canvas.width;
             let y = f(x);
+            console.log(x, y)
             if (x == 0) {
-                drawAxis(xx, 0, xx, canvas.height)
+                drawAxis(xx, 0, xx, canvas.height);
+                drawnAxisX = true;
+            } else if (!drawnAxisX && oldX < 0 && x > 0) {
+                drawAxis(xx, 0, xx, canvas.height);
+                drawnAxisX = true;
             }
             if (y < ymin) ymin = y;
             if (y > ymax) ymax = y;
+            oldX = x;
         }
         let yy = (f(start) - ymin) * canvas.height / (ymax - ymin);
         ctx.moveTo(0, yy);
         let oldy = 0;
+        let olddy = 0;
         for (let xx = 0; xx < canvas.width; xx++) {
             x = start + xx * (end - start) / canvas.width;
             y = f(x);
             yy = (y - ymax) * canvas.height / (ymin - ymax);
-            if (y === 0) {
+            if (!drawnAxisY && y === 0) {
                 drawAxis(0, yy, canvas.width, yy);
+                drawnAxisY = true;
+                ctx.moveTo(xx - 1, oldy);
+            } else if (!drawnAxisY && (Math.round(y * 100) / 100 === 0 || (olddy < 0 && y > 0 && Math.floor(y) === 0) || (olddy > 0 && y < 0 && Math.ceil(y) === 0))) {
+                drawAxis(0, yy, canvas.width, yy);
+                drawnAxisY = true;
                 ctx.moveTo(xx - 1, oldy);
             }
-            ctx.lineTo(xx, yy);
+            if (xx == 0) {
+                ctx.moveTo(xx, yy)
+            } else {
+                ctx.lineTo(xx, yy);
+            }
+            olddy = y;
             oldy = yy;
         }
         ctx.stroke();
     }
 
     function f(x) {
-        return -x * x;
-        // return x * Math.sin(x * x);
+        return x * Math.sin(x * x);
     }
 
 })()
